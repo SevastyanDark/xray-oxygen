@@ -185,7 +185,7 @@ void Log				(const char *msg, const Fvector &dop) {
 	Log			(buf);
 }
 
-void Log				(const char *msg, const Fmatrix &dop)	{
+void Log				(const char *msg, const DirectX::XMMATRIX &dop)	{
 	u32			buffer_size = (xr_strlen(msg) + 2 + 4*( 4*(64 + 1) + 1 ) + 1) * sizeof(char);
 	PSTR buf	= (PSTR)_alloca( buffer_size );
 

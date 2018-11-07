@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #pragma hdrstop
 #include "NET_utils.h"
+#include <DirectXMath.h>
 
 // ---NET_Packet
 // reading
@@ -158,7 +159,7 @@ void NET_Packet::skip_stringZ() {
     r_advance(len + 1);
 }
 
-void NET_Packet::r_matrix(Fmatrix& M) {
+void NET_Packet::r_matrix(DirectX::XMMATRIX& M) {
     r_vec3(M.i);
     M._14_ = 0;
     r_vec3(M.j);
