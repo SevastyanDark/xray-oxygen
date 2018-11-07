@@ -2,6 +2,7 @@
 #pragma hdrstop
 
 #include "Frustum.h"
+#include <DirectXMath.h>
 
 //////////////////////////////////////////////////////////////////////
 void			CFrustum::fplane::cache	()	{
@@ -179,7 +180,7 @@ void CFrustum::CreateFromPlanes(Fplane* p, int count){
 	p_count = count;
 }
 
-void CFrustum::CreateFromPortal(sPoly* poly, Fvector& vPN, Fvector& vBase, Fmatrix& mFullXFORM)
+void CFrustum::CreateFromPortal(sPoly* poly, Fvector& vPN, Fvector& vBase, DirectX::XMMATRIX& mFullXFORM)
 {
 	Fplane	P;
 	P.build_precise	((*poly)[0],(*poly)[1],(*poly)[2]);
@@ -204,11 +205,12 @@ void CFrustum::CreateFromPortal(sPoly* poly, Fvector& vPN, Fvector& vBase, Fmatr
 	_add		(P);
 
 	// Far clipping plane
-	Fmatrix &M	= mFullXFORM;
-	P.n.x		= -(M._14 - M._13);
-	P.n.y		= -(M._24 - M._23);
-	P.n.z		= -(M._34 - M._33);
-	P.d			= -(M._44 - M._43);
+	DirectX::XMMATRIX &M	= mFullXFORM;
+
+	P.n.x		= -(M.r[0].m128_f32[3] - M.r[0].m128_f32[2]);
+	P.n.y		= -(M.r[1].m128_f32[3] - M.r[1].m128_f32[2]);
+	P.n.z		= -(M.r[2].m128_f32[3] - M.r[2].m128_f32[2]);
+	P.d			= -(M.r[3].m128_f32[3] - M.r[3].m128_f32[2]);
 	float denom = 1.0f / P.n.magnitude();
 	P.n.x		*= denom;
 	P.n.y		*= denom;
