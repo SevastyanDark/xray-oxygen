@@ -1,89 +1,50 @@
-////////////////////////////////////////////////////////////////////////////
-//	Module 		: profiler.h
-//	Created 	: 23.07.2004
-//  Modified 	: 23.07.2004
-//	Author		: Dmitriy Iassenev
-//	Description : Profiler
-////////////////////////////////////////////////////////////////////////////
-
 #pragma once
+#include <cstdlib>
 
-#ifdef XRGAME_EXPORTS
-#	ifdef DEBUG
-#		define	USE_PROFILER
-#	endif // DEBUG
-#endif // XRGAME_EXPORTS
-
-#ifdef USE_PROFILER
-#	include "ai_debug.h"
-
-#pragma pack(push,4)
-struct CProfileResultPortion {
-	u64				m_time;
-	LPCSTR			m_timer_id;
-};
-#pragma pack(pop)
-
-struct CProfilePortion : public CProfileResultPortion {
-	IC				CProfilePortion		(LPCSTR timer_id);
-	IC				~CProfilePortion	();
+/// #DARK: rename this.
+struct xrProfilerEntry
+{
+	xr_string functionName;
+	std::chrono::steady_clock::time_point beginTime;
+	std::vector<xrProfilerEntry> childs;
+	std::chrono::steady_clock::time_point endTime;
+	std::chrono::nanoseconds elapsedTime;
 };
 
-struct CProfileStats {
-	u32				m_update_time;
-	shared_str		m_name;
-	float			m_time;
-	float			m_min_time;
-	float			m_max_time;
-	float			m_total_time;
-	u32				m_count;
-	u32				m_call_count;
-
-	IC				CProfileStats		();
-};
-
-class CProfiler {
+typedef struct
+{
 private:
-	struct pred_rstr {
-		IC	bool operator()	(const shared_str &_1, const shared_str &_2) const
-		{
-			return	(xr_strcmp(*_1,*_2) < 0);
-		}
-	};
-protected:
-	using PORTIONS = xr_vector<CProfileResultPortion>;
-	using TIMERS = xr_map<shared_str,CProfileStats,pred_rstr>;
-
-protected:
-	PORTIONS			m_portions;
-	TIMERS				m_timers;
-	bool				m_actual;
-	xrCriticalSection	m_section;
-	u32					m_call_count;
-
-protected:
-			void		setup_timer			(LPCSTR timer_id, const u64 &timer_time, const u32 &call_count);
-	IC		void		convert_string		(LPCSTR str, shared_str &out, u32 max_string_size);
-
+	xrProfilerEntry _callstack;
 public:
-						CProfiler			();
-						~CProfiler			();
-			void		show_stats			(CGameFont *game_font, bool show);
-			void		clear				();
-			void		add_profile_portion	(const CProfileResultPortion &profile_portion);
-};
+	void beginFunction(xr_string funName, DWORD threadId)
+	{
+		if (_callstack.childs.empty())
+		{
+			_callstack.functionName = funName;
+			_callstack.beginTime = std::chrono::steady_clock::now();
+			return;
+		}
+		_callstack.childs.push_back({ funName, std::chrono::steady_clock::now() });
+	}
+	void endFunction()
+	{
+		if (_callstack.childs.empty())
+		{
+			_callstack.endTime = std::chrono::steady_clock::now();
+			_callstack.elapsedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(_callstack.beginTime - _callstack.endTime);
+		}
+		_callstack.childs.back().endTime = std::chrono::steady_clock::now();
+		_callstack.childs.back().elapsedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(_callstack.childs.back().beginTime - _callstack.childs.back().endTime);
+	}
 
-extern 	CProfiler *g_profiler;
-extern Flags32 psAI_Flags;
+} xrProfiler;
 
-IC	CProfiler&	profiler();
-		
-#	define START_PROFILE(a) { CProfilePortion	__profile_portion__(a);
-#	define STOP_PROFILE     }
+extern xrProfiler Profiler;
 
-#	include "profiler_inline.h"
+// Use this at beginning and end of the function
+// you want to profile
 
-#else // DEBUG
-#	define START_PROFILE(a) {
-#	define STOP_PROFILE		}
-#endif // DEBUG
+#define PROFILER_BEGIN() Profiler.beginFunction(__FUNCTION__, GetCurrentThreadId());
+#define PROFILER_BEGIN(x) Profiler.beginFunction(x);
+
+#define PROFLLER_END() Profiler.endFunction();
