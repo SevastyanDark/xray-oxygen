@@ -1,5 +1,4 @@
 #pragma once
-
 /***************************************************************************
  *   Copyright (C) 2018 - ForserX & Oxydev
  *
@@ -88,6 +87,19 @@ inline Fmatrix CastToGSCMatrix(const DirectX::XMMATRIX &m)
 		m.r[2].m128_f32[0], m.r[2].m128_f32[1], m.r[2].m128_f32[2], m.r[2].m128_f32[3],
 		m.r[3].m128_f32[0], m.r[3].m128_f32[1], m.r[3].m128_f32[2], m.r[3].m128_f32[3]
 	};
+}
+
+/// <summary>Convert Fmatrix to DirectX::XMMATRIX</summary>
+inline DirectX::XMMATRIX CastToDXMatrix(Fmatrix &m)
+{
+	DirectX::XMMATRIX newMatrix;
+
+	newMatrix.r[0].m128_f32[0] = m._11; newMatrix.r[0].m128_f32[1] = m._12; newMatrix.r[0].m128_f32[2] = m._13; newMatrix.r[0].m128_f32[3] = m._14;
+	newMatrix.r[1].m128_f32[0] = m._21; newMatrix.r[1].m128_f32[1] = m._22; newMatrix.r[1].m128_f32[2] = m._23; newMatrix.r[1].m128_f32[3] = m._24;
+	newMatrix.r[2].m128_f32[0] = m._31; newMatrix.r[2].m128_f32[1] = m._32; newMatrix.r[2].m128_f32[2] = m._33; newMatrix.r[2].m128_f32[3] = m._34;
+	newMatrix.r[3].m128_f32[0] = m._41; newMatrix.r[3].m128_f32[1] = m._42; newMatrix.r[3].m128_f32[2] = m._43; newMatrix.r[3].m128_f32[3] = m._44;
+
+	return newMatrix;
 }
 
 /// <summary>Call Fbox::xform for DirectX::XMMATRIX</summary>
