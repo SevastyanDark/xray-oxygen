@@ -32,7 +32,7 @@ void CPortalTraverser::traverse			(IRender_Sector* start, CFrustum& F, Fvector& 
 	i_marker			++;
 	i_options			= options;
 	i_vBase				= vBase;
-	i_mXFORM			= mXFORM;
+	i_mXFORM			= CastToDXMatrix(mXFORM);
 	i_mXFORM_01.mul		(m_viewport_01,mXFORM);
 	i_start				= (CSector*)start;
 	r_sectors.clear		();
