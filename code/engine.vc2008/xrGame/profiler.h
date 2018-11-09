@@ -9,7 +9,6 @@ struct xrProfiler
 	void endFunction() {};
 };
 
-xrProfiler Profiler;
 
 #define START_PROFILE(a) Profiler.startFunction(a);
 #define STOP_PROFILE	 Profiler.endFunction();

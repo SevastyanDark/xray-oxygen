@@ -329,10 +329,10 @@ int GetNumOfDisplays()
 	return sValue;
 }
 
-void CRenderDevice::Run			()
+void CRenderDevice::Run()
 {
 	BeginToWork();
-	message_loop				();
+	message_loop();
 
 	seqAppEnd.Process		(rp_AppEnd);
 
